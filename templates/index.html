@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>REGISTRO DE ESTUDIANTES</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f8f8f8;
+            position: relative;
+            text-transform: uppercase;
+        }
+
+        .linea-lateral {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 35px;
+            height: 100vh;
+            background: linear-gradient(to bottom, red 0%, red 70%, rgba(255,0,0,0) 100%);
+            clip-path: polygon(0 0, 100% 0, 40% 100%, 0 100%);
+        }
+
+        .linea-superior {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 35px;
+            background: linear-gradient(to right, red 0%, red 70%, rgba(255,0,0,0) 100%);
+            clip-path: polygon(0 0, 100% 0, 100% 40%, 0 100%);
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: bold;
+            margin-top: 50px;
+            margin-left: 60px;
+            text-align: left;
+        }
+
+        #logo-uvm {
+            position: absolute;
+            top: 60px;
+            right: 40px;
+            width: 350px;
+            height: auto;
+        }
+
+        form {
+            width: 350px;
+            margin-left: 60px;
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: left;
+        }
+
+        input[type="text"], input[type="number"] {
+            width: 95%;
+            padding: 8px;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+
+        #btn-foto {
+            background: red;
+            color: white;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.3);
+        }
+
+        #botones {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        #preview-container {
+            width: 320px;
+            height: 240px;
+            background: #ddd;
+            border: 1px solid #aaa;
+            margin: 10px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        #foto-preview {
+            width: 100%;
+            height: auto;
+        }
+
+        video {
+            display: none;
+        }
+
+        #indicador-fotos {
+            font-size: 12px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="linea-lateral"></div>
+<div class="linea-superior"></div>
+
+<h1>REGISTRO DE ESTUDIANTES</h1>
+
+<img id="logo-uvm" src="{{ url_for('static', filename='UVM.webp') }}">
+
+<form id="form-registro" action="/registrar" method="POST">
+    <!-- indicamos que este registro es de ALUMNO -->
+    <input type="hidden" name="tipo" value="alumno">
+
+    <input type="text" name="nombre" placeholder="NOMBRE(S)" required>
+    <input type="text" name="apellidos" placeholder="APELLIDOS" required>
+    <input type="text" name="matricula" placeholder="MATRÍCULA" required>
+    <input type="text" name="carrera" placeholder="CARRERA" required>
+    <input type="number" name="semestre" placeholder="SEMESTRE" min="1" max="12">
+
+    <p>TOMA 3 FOTOS: 1 DE FRENTE Y 2 DE PERFIL</p>
+
+    <video id="video" width="320" height="240" autoplay></video>
+
+    <div id="preview-container">
+        <img id="foto-preview" src="">
+    </div>
+
+    <canvas id="canvas" width="240" height="180" style="display:none;"></canvas>
+
+
+    <!-- aquí se guardan las 3 fotos en base64 -->
+    <input type="hidden" name="foto1" id="foto1">
+    <input type="hidden" name="foto2" id="foto2">
+    <input type="hidden" name="foto3" id="foto3">
+
+    <div id="indicador-fotos">Foto 1 de 3</div>
+
+    <div id="botones">
+        <button type="button" id="btn-foto">CAPTURAR FOTO</button>
+        <button type="submit">REGISTRAR</button>
+    </div>
+</form>
+
+<script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const preview = document.getElementById('foto-preview');
+    const btnFoto = document.getElementById('btn-foto');
+    const indicador = document.getElementById('indicador-fotos');
+
+    const foto1 = document.getElementById('foto1');
+    const foto2 = document.getElementById('foto2');
+    const foto3 = document.getElementById('foto3');
+
+    let indice = 1;
+    const maxFotos = 3;
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+            video.srcObject = stream;
+            video.style.display = "block";
+        })
+        .catch(err => {
+            alert("No se pudo acceder a la cámara: " + err);
+        });
+
+    btnFoto.addEventListener("click", () => {
+        if (indice > maxFotos) {
+            alert("Ya capturaste las 3 fotos.");
+            return;
+        }
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const dataURL = canvas.toDataURL("image/jpeg", 0.6); // 60% de calidad
+
+
+        preview.src = dataURL;
+
+        if (indice === 1) {
+            foto1.value = dataURL;
+        } else if (indice === 2) {
+            foto2.value = dataURL;
+        } else if (indice === 3) {
+            foto3.value = dataURL;
+        }
+
+        indicador.textContent = `Foto ${indice} de ${maxFotos} capturada`;
+        indice += 1;
+    });
+</script>
+
+</body>
+</html>

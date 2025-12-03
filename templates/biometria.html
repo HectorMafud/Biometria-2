@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>BIOMETRÍA - ACCESO</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f8f8f8;
+            position: relative;
+            text-transform: uppercase;
+        }
+        .linea-lateral {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 35px;
+            height: 100vh;
+            background: linear-gradient(to bottom, red 0%, red 70%, rgba(255,0,0,0) 100%);
+            clip-path: polygon(0 0, 100% 0, 40% 100%, 0 100%);
+        }
+        .linea-superior {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 35px;
+            background: linear-gradient(to right, red 0%, red 70%, rgba(255,0,0,0) 100%);
+            clip-path: polygon(0 0, 100% 0, 100% 40%, 0 100%);
+        }
+        h1 {
+            font-size: 32px;
+            font-weight: bold;
+            margin-top: 50px;
+            margin-left: 60px;
+        }
+        #logo-uvm {
+            position: absolute;
+            top: 60px;
+            right: 40px;
+            width: 350px;
+            height: auto;
+        }
+        form {
+            width: 350px;
+            margin-left: 60px;
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        select, input[type="text"] {
+            width: 95%;
+            padding: 8px;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+        #btn-foto {
+            background: red;
+            color: white;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.3);
+        }
+        #preview-container {
+            width: 320px;
+            height: 240px;
+            background: #ddd;
+            border: 1px solid #aaa;
+            margin: 10px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        #foto-preview {
+            width: 100%;
+            height: auto;
+        }
+        video {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="linea-lateral"></div>
+<div class="linea-superior"></div>
+
+<h1>BIOMETRÍA - ACCESO</h1>
+
+<img id="logo-uvm" src="{{ url_for('static', filename='UVM.webp') }}">
+
+{% if mensaje %}
+    {% if exito %}
+        <div style="color: green; font-size: 20px; font-weight: bold; margin-left: 60px;">
+            ✔ {{ mensaje }}
+        </div>
+    {% else %}
+        <div style="color: red; font-size: 20px; font-weight: bold; margin-left: 60px;">
+            ✖ {{ mensaje }}
+        </div>
+    {% endif %}
+{% endif %}
+
+
+<form method="POST" action="/biometria">
+    <select name="tipo" id="tipo">
+        <option value="alumno">ALUMNO</option>
+        <option value="profesor">PROFESOR</option>
+        <option value="trabajador">TRABAJADOR</option>
+    </select>
+
+    <input type="text" name="carrera" id="carrera" placeholder="CARRERA (SOLO ALUMNO)">
+
+    <video id="video" width="320" height="240" autoplay></video>
+
+    <div id="preview-container">
+        <img id="foto-preview" src="">
+    </div>
+
+    <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+    <input type="hidden" name="foto" id="input-foto">
+
+    <button type="button" id="btn-foto">CAPTURAR FOTO</button>
+    <button type="submit">VERIFICAR ACCESO</button>
+</form>
+
+<script>
+    const tipoSelect = document.getElementById('tipo');
+    const carreraInput = document.getElementById('carrera');
+
+    tipoSelect.addEventListener('change', () => {
+        if (tipoSelect.value === 'alumno') {
+            carreraInput.style.display = 'block';
+        } else {
+            carreraInput.style.display = 'none';
+            carreraInput.value = '';
+        }
+    });
+
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const preview = document.getElementById('foto-preview');
+    const inputFoto = document.getElementById('input-foto');
+    const btnFoto = document.getElementById('btn-foto');
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+            video.srcObject = stream;
+            video.style.display = "block";
+        })
+        .catch(err => {
+            alert("No se pudo acceder a la cámara: " + err);
+        });
+
+    btnFoto.addEventListener("click", () => {
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const dataURL = canvas.toDataURL("image/png");
+        preview.src = dataURL;
+        inputFoto.value = dataURL;
+        alert("Foto capturada.");
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Menú Principal</title>
+<style>
+    body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f8f8;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column;
+    }
+
+    h1 {
+    font-size: 36px;
+    margin-bottom: 40px;
+    color: #222;
+    }
+
+    .boton {
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 28px;
+    font-family: Arial, sans-serif;
+    padding: 20px 40px;
+    margin: 15px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    width: 400px;
+    transition: transform 0.2s, background-color 0.3s;
+    text-transform: uppercase;
+    }
+
+    .boton:hover {
+    background-color: darkred;
+    transform: scale(1.05);
+    }
+
+</style>
+</head>
+<body>
+
+<h1>MENÚ PRINCIPAL</h1>
+
+<button class="boton" onclick="window.location.href='/login'">ADMINISTRADOR</button>
+<button class="boton" onclick="window.location.href='/Alumnos'">REGISTRO DE ESTUDIANTES</button>
+<button class="boton" onclick="window.location.href='/profesores'">REGISTRO DE PROFESORES</button>
+<button class="boton" onclick="window.location.href='/trabajadores'">REGISTRO DE TRABAJADORES</button>
+<button class="boton" onclick="window.location.href='/biometria'">BIOMETRÍA - ACCESO</button>   
+</body>
+</html>

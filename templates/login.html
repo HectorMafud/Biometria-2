@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+<title>LOGIN</title>
+<style>
+    body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f8f8f8;
+    position: relative;
+    text-transform: uppercase;
+    }
+
+    /* Líneas decorativas */
+    .linea-lateral {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 35px;
+    height: 100vh;
+    background: linear-gradient(to bottom, red 0%, red 70%, rgba(255,0,0,0) 100%);
+    clip-path: polygon(0 0, 100% 0, 40% 100%, 0 100%);
+    }
+
+    .linea-superior {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 35px;
+    background: linear-gradient(to right, red 0%, red 70%, rgba(255,0,0,0) 100%);
+    clip-path: polygon(0 0, 100% 0, 100% 40%, 0 100%);
+    }
+
+    /* Botón registrarse (arriba a la derecha) */
+    #btn-registrarse {
+    position: absolute;
+    top: 15px;
+    right: 30px;
+    background: red;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 3px 5px rgba(0,0,0,0.3);
+    text-transform: uppercase;
+    }
+
+    /* Contenedor del formulario centrado */
+    .contenedor {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column;
+    }
+
+    h1 {
+    font-size: 36px;
+    font-weight: bold;
+    margin-bottom: 30px;
+    text-align: center;
+    }
+
+    form {
+    background: white;
+    padding: 30px 40px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    width: 320px;
+    text-align: center;
+    }
+
+    input[type="text"], input[type="password"] {
+    width: 90%;
+    padding: 10px;
+    font-size: 16px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    }
+
+    #ingresar {
+    background: red;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 3px 5px rgba(0,0,0,0.3);
+    transition: transform 0.1s;
+    }
+
+    #ingresar:hover {
+    transform: scale(1.05);
+    }
+
+</style>
+</head>
+<body>
+
+<div class="linea-lateral"></div>
+<div class="linea-superior"></div>
+
+<button id="btn-registrarse" onclick="window.location.href='/registrarse'">REGISTRARSE</button>
+
+<div class="contenedor">
+    <h1>LOGIN</h1>
+
+    <form id="form-login" method="POST" action="/login">
+    <input type="text" name="usuario" placeholder="USUARIO" required><br>
+    <input type="password" name="contrasena" placeholder="CONTRASEÑA" required><br>
+    <button type="submit" id="ingresar">INGRESAR</button>
+    </form>
+</div>
+
+</body>
+</html>
