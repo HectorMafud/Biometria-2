@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>BIOMETRÍA - ACCESO</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f8f8f8;
+            position: relative;
+            text-transform: uppercase;
+        }
+        .linea-lateral {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 35px;
+            height: 100vh;
+            background: linear-gradient(to bottom, red 0%, red 70%, rgba(255,0,0,0) 100%);
+            clip-path: polygon(0 0, 100% 0, 40% 100%, 0 100%);
+        }
+        .linea-superior {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 35px;
+            background: linear-gradient(to right, red 0%, red 70%, rgba(255,0,0,0) 100%);
+            clip-path: polygon(0 0, 100% 0, 100% 40%, 0 100%);
+        }
+        h1 {
+            font-size: 32px;
+            font-weight: bold;
+            margin-top: 50px;
+            margin-left: 60px;
+        }
+        #logo-uvm {
+            position: absolute;
+            top: 60px;
+            right: 40px;
+            width: 350px;
+            height: auto;
+        }
+        form {
+            width: 350px;
+            margin-left: 60px;
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        select, input[type="text"] {
+            width: 95%;
+            padding: 8px;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        #mensaje-estado {
+            margin-left: 60px;
+            margin-top: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        #mensaje-estado.ok {
+            color: green;
+        }
+        #mensaje-estado.fail {
+            color: red;
+        }
+        #mensaje-estado.scan {
+            color: #444;
+            font-size: 14px;
+        }
+        video {
+            display: block;
+            margin-top: 10px;
+        }
+        #scan-status {
+            font-size: 12px;
+            margin-top: 5px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+
+<div class="linea-lateral"></div>
+<div class="linea-superior"></div>
+
+<h1>BIOMETRÍA - ACCESO</h1>
+
+<img id="logo-uvm" src="{{ url_for('static', filename='UVM.webp') }}">
+
+<div id="mensaje-estado" class="scan">
+    Esperando reconocimiento... (pasar la cara frente a la cámara)
+</div>
+
+<form id="config-bio">
+    <select name="tipo" id="tipo">
+        <option value="alumno">ALUMNO</option>
+        <option value="profesor">PROFESOR</option>
+        <option value="trabajador">TRABAJADOR</option>
+    </select>
+
+    <input type="text" name="carrera" id="carrera" placeholder="CARRERA (SOLO ALUMNO)">
+
+    <video id="video" width="320" height="240" autoplay></video>
+
+    <div id="scan-status">Escaneando cada 3 segundos...</div>
+</form>
+
+<canvas id="canvas" width="240" height="180" style="display:none;"></canvas>
+
+<script>
+    const tipoSelect = document.getElementById('tipo');
+    const carreraInput = document.getElementById('carrera');
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const mensajeEstado = document.getElementById('mensaje-estado');
+
+    let streamActivo = null;
+    let intervaloScan = null;
+    let bloqueado = false;  // para no hacer muchas peticiones a la vez
+
+    // Mostrar / ocultar campo carrera según tipo
+    tipoSelect.addEventListener('change', () => {
+        if (tipoSelect.value === 'alumno') {
+            carreraInput.style.display = 'block';
+        } else {
+            carreraInput.style.display = 'none';
+            carreraInput.value = '';
+        }
+    });
+
+    // Encender cámara
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+            streamActivo = stream;
+            video.srcObject = stream;
+            iniciarEscaneoAutomatico();
+        })
+        .catch(err => {
+            console.error("No se pudo acceder a la cámara:", err);
+            alert("No se pudo acceder a la cámara: " + err);
+            mensajeEstado.textContent = "Error: no se pudo acceder a la cámara.";
+            mensajeEstado.className = "fail";
+        });
+
+    function iniciarEscaneoAutomatico() {
+        if (intervaloScan) {
+            clearInterval(intervaloScan);
+        }
+
+        // Escanear cada 3 segundos
+        intervaloScan = setInterval(() => {
+            if (bloqueado) return;  // si sigue procesando el anterior, espera
+
+            // Si es alumno y no hay carrera, no escaneamos aún
+            if (tipoSelect.value === 'alumno' && carreraInput.value.trim() === "") {
+                mensajeEstado.textContent = "Escribe la carrera para iniciar el escaneo (alumno).";
+                mensajeEstado.className = "scan";
+                return;
+            }
+
+            capturarYEnviar();
+        }, 3000);
+    }
+
+    function capturarYEnviar() {
+        if (!streamActivo) return;
+
+        bloqueado = true;
+        mensajeEstado.textContent = "Escaneando rostro...";
+        mensajeEstado.className = "scan";
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        const dataURL = canvas.toDataURL('image/jpeg', 0.6);
+
+        const formData = new FormData();
+        formData.append("tipo", tipoSelect.value);
+        formData.append("carrera", carreraInput.value);
+        formData.append("foto", dataURL);
+
+        fetch("/biometria_auto", {
+            method: "POST",
+            body: formData
+        })
+        .then(resp => resp.json())
+        .then(data => {
+            if (data.exito) {
+                // Mostrar acceso correcto
+                mensajeEstado.textContent = data.mensaje;
+                mensajeEstado.className = "ok";
+
+                // Después de 3 segundos, regresar a modo "escaneando"
+                setTimeout(() => {
+                    mensajeEstado.textContent = "Escaneando... pasa tu cara frente a la cámara";
+                    mensajeEstado.className = "scan";
+                }, 3000);
+
+            } else {
+                // Mostrar acceso denegado
+                mensajeEstado.textContent = data.mensaje;
+                mensajeEstado.className = "fail";
+
+                // También lo regresamos a "escaneando" después de 3 segundos
+                setTimeout(() => {
+                    mensajeEstado.textContent = "Escaneando... pasa tu cara frente a la cámara";
+                    mensajeEstado.className = "scan";
+                }, 3000);
+            }
+        })
+        .catch(err => {
+            console.error("Error en biometría automática:", err);
+            mensajeEstado.textContent = "Error en el reconocimiento.";
+            mensajeEstado.className = "fail";
+
+            setTimeout(() => {
+                mensajeEstado.textContent = "Escaneando... pasa tu cara frente a la cámara";
+                mensajeEstado.className = "scan";
+            }, 3000);
+        })
+        .finally(() => {
+            bloqueado = false;
+        });
+    }
+</script>
+
+</body>
+</html>

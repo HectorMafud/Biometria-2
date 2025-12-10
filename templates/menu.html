@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>MENÚ PRINCIPAL</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f8f8f8;
+            position: relative;
+            text-transform: uppercase;
+        }
+        .linea-lateral {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 35px;
+            height: 100vh;
+            background: linear-gradient(to bottom, red 0%, red 70%, rgba(255,0,0,0) 100%);
+            clip-path: polygon(0 0, 100% 0, 40% 100%, 0 100%);
+        }
+        .linea-superior {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 35px;
+            background: linear-gradient(to right, red 0%, red 70%, rgba(255,0,0,0) 100%);
+            clip-path: polygon(0 0, 100% 0, 100% 40%, 0 100%);
+        }
+        h1 {
+            font-size: 36px;
+            font-weight: bold;
+            margin-top: 50px;
+            margin-left: 60px;
+        }
+        #logo-uvm {
+            position: absolute;
+            top: 60px;
+            right: 40px;
+            width: 350px;
+            height: auto;
+        }
+        .contenedor-botones {
+            margin-left: 60px;
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 320px;
+        }
+        .btn-menu {
+            display: block;
+            padding: 12px 18px;
+            text-align: center;
+            text-decoration: none;
+            background: red;
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.3);
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .btn-secundario {
+            background: #555;
+        }
+        .usuario-info {
+            margin-left: 60px;
+            margin-top: 10px;
+            font-size: 14px;
+            text-transform: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="linea-lateral"></div>
+<div class="linea-superior"></div>
+
+<h1>SISTEMA DE CONTROL UVM</h1>
+
+<img id="logo-uvm" src="{{ url_for('static', filename='UVM.webp') }}">
+
+{% if logueado %}
+    <div class="usuario-info">
+        Sesión iniciada como: <strong>{{ usuario }}</strong>
+    </div>
+{% endif %}
+
+<div class="contenedor-botones">
+
+    <!-- Siempre visibles -->
+    <a href="{{ url_for('login') }}" class="btn-menu">INICIO DE SESIÓN</a>
+    <a href="{{ url_for('biometria') }}" class="btn-menu">BIOMETRÍA</a>
+
+    {% if logueado %}
+        <!-- Solo si hay sesión -->
+        <a href="{{ url_for('estudiantes') }}" class="btn-menu btn-secundario">REGISTRO DE ESTUDIANTES</a>
+        <a href="{{ url_for('profesores') }}" class="btn-menu btn-secundario">REGISTRO DE PROFESORES</a>
+        <a href="{{ url_for('trabajadores') }}" class="btn-menu btn-secundario">REGISTRO DE TRABAJADORES</a>
+        <a href="{{ url_for('logout') }}" class="btn-menu" style="background:#222;">CERRAR SESIÓN</a>
+    {% endif %}
+</div>
+
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>INICIO DE SESIÓN</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f8f8f8;
+            position: relative;
+            text-transform: uppercase;
+        }
+        .linea-lateral {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 35px;
+            height: 100vh;
+            background: linear-gradient(to bottom, red 0%, red 70%, rgba(255,0,0,0) 100%);
+            clip-path: polygon(0 0, 100% 0, 40% 100%, 0 100%);
+        }
+        .linea-superior {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 35px;
+            background: linear-gradient(to right, red 0%, red 70%, rgba(255,0,0,0) 100%);
+            clip-path: polygon(0 0, 100% 0, 100% 40%, 0 100%);
+        }
+        h1 {
+            font-size: 32px;
+            font-weight: bold;
+            margin-top: 50px;
+            margin-left: 60px;
+        }
+        #logo-uvm {
+            position: absolute;
+            top: 60px;
+            right: 40px;
+            width: 350px;
+            height: auto;
+        }
+        form {
+            width: 350px;
+            margin-left: 60px;
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        input[type="text"], input[type="password"] {
+            width: 95%;
+            padding: 8px;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background: red;
+            color: white;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.3);
+            width: 100%;
+        }
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-left: 60px;
+            margin-top: 10px;
+        }
+        .volver {
+            margin-left: 60px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .volver a {
+            color: red;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="linea-lateral"></div>
+<div class="linea-superior"></div>
+
+<h1>INICIO DE SESIÓN</h1>
+
+<img id="logo-uvm" src="{{ url_for('static', filename='UVM.webp') }}">
+
+{% if error %}
+    <div class="error">{{ error }}</div>
+{% endif %}
+
+<form method="POST" action="{{ url_for('login') }}">
+    <input type="text" name="usuario" placeholder="USUARIO" required>
+    <input type="password" name="password" placeholder="CONTRASEÑA" required>
+    <button type="submit">ENTRAR</button>
+</form>
+
+<div class="volver">
+    <a href="{{ url_for('menu') }}">&larr; Volver al menú</a>
+</div>
+
+</body>
+</html>

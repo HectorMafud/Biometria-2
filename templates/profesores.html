@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>REGISTRO DE PROFESOR</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f8f8f8;
+            position: relative;
+            text-transform: uppercase;
+        }
+
+        .linea-lateral {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 35px;
+            height: 100vh;
+            background: linear-gradient(to bottom, red 0%, red 70%, rgba(255,0,0,0) 100%);
+            clip-path: polygon(0 0, 100% 0, 40% 100%, 0 100%);
+        }
+
+        .linea-superior {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 35px;
+            background: linear-gradient(to right, red 0%, red 70%, rgba(255,0,0,0) 100%);
+            clip-path: polygon(0 0, 100% 0, 100% 40%, 0 100%);
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: bold;
+            margin-top: 50px;
+            margin-left: 60px;
+            text-align: left;
+        }
+
+        #logo-uvm {
+            position: absolute;
+            top: 60px;
+            right: 40px;
+            width: 350px;
+            height: auto;
+        }
+
+        form {
+            width: 350px;
+            margin-left: 60px;
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: left;
+        }
+
+        input[type="text"] {
+            width: 95%;
+            padding: 8px;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+
+        #capturar {
+            background: red;
+            color: white;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.3);
+        }
+
+        #botones {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        #preview-container {
+            width: 320px;
+            height: 240px;
+            background: #ddd;
+            border: 1px solid #aaa;
+            margin: 10px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        #preview {
+            width: 100%;
+            height: auto;
+        }
+
+        video {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="linea-lateral"></div>
+<div class="linea-superior"></div>
+
+<h1>REGISTRO DE PROFESOR</h1>
+
+<img id="logo-uvm" src="{{ url_for('static', filename='UVM.webp') }}">
+
+<form id="form-profesor" method="POST" action="/registrar">
+    <!-- Muy importante: esto hace que se guarde como PROFESOR -->
+    <input type="hidden" name="tipo" value="profesor">
+
+    <input type="text" name="nombre" placeholder="NOMBRE(S)" required>
+    <input type="text" name="apellidos" placeholder="APELLIDOS" required>
+    <input type="text" name="matricula" placeholder="MATRÍCULA" required>
+
+    <!-- Si quieres también puedes guardar área/departamento -->
+    <!-- <input type="text" name="carrera" placeholder="DEPARTAMENTO / ÁREA"> -->
+
+    <!-- Cámara -->
+    <video id="video" width="320" height="240" autoplay></video>
+
+    <div id="preview-container">
+        <img id="preview" src="">
+    </div>
+
+    <canvas id="canvas" width="240" height="180" style="display:none;"></canvas>
+    <input type="hidden" name="foto1" id="foto1">
+
+    <div id="botones">
+        <button type="button" id="capturar">CAPTURAR FOTO</button>
+        <button type="submit">REGISTRAR</button>
+    </div>
+</form>
+
+<script>
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const preview = document.getElementById("preview");
+    const inputFoto1 = document.getElementById("foto1");
+    const btnCapturar = document.getElementById("capturar");
+
+    // Activar cámara
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+            video.srcObject = stream;
+            video.style.display = "block";
+        })
+        .catch(err => {
+            alert("No se pudo acceder a la cámara: " + err);
+        });
+
+    // Capturar foto (solo una para profesor, si quieres luego ampliamos)
+    btnCapturar.addEventListener("click", () => {
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Usamos JPEG comprimido para que no pese tanto
+        const dataURL = canvas.toDataURL("image/jpeg", 0.6);
+        preview.src = dataURL;
+        inputFoto1.value = dataURL;
+
+        alert("Foto capturada.");
+    });
+</script>
+
+</body>
+</html>
